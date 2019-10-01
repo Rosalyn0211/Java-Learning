@@ -2,6 +2,8 @@
 
 ### 关键字和保留字
  - 关键字：被Java赋予了特殊含义，用做专门用途的字符串，关键字中所有字母均为小写。
+ ![image](images/关键字.png)
+ ![image](images/关键字2.png)
  - 保留字：现有Java版本尚未使用，但以后版本可能会作为关键字使用。(goto,const)
 
 ### 标识符
@@ -30,13 +32,19 @@
 
 变量的分类
  - 按数据类型
+  ![image](images/数据类型.png)
  - 按声明位置的不同
- 
-整数类型：byte,short,int,long
+ ![image](images/变量类型.png)
+  
+  
+整数类型：byte,short,int,long   
+![image](images/整数类型.png)
 
+ - Java整型变量默认为int，声明long型常量需后加‘L’或‘l’
+ 
 浮点类型：float,double  
 
- - float：单精度，尾数可精确到7位有效数字
+ - float：单精度，尾数可精确到7位有效数字，需后加‘f’
 
  - double：双精度，浮点型默认类型  
  
@@ -59,8 +67,13 @@ Boolean类型
 
 自动类型转换：
 
-注意：当把任何基本数据类型的值和字符串进行连接运算时，基本数据类型的值将自动转化为字
+
+![image](images/基本数据类型转换.png)
+
+注意：
+ - 当把任何基本数据类型的值和字符串进行连接运算时，基本数据类型的值将自动转化为字
 符串类型。
+ - byte,short,char之间进行运算时转换为int类型
 
 字符串类型：String  
  - String不是基本数据类型，属于引用数据类型

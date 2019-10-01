@@ -85,4 +85,29 @@ Boolean类型
  String a = "43"; int i = Integer.parselnt(a);
  - boolean类型不可以转换为其他的数据类型
  
+ ### 运算符
+算数运算符
+
+![image](images/运算符.png)
+
+ - +除字符串相加功能外，还能把非字符串转换成字符串
+ 例如：System.out.println (“5+ 5+5); // 打印结果是5+5=55
  
+赋值运算符
+ - =当 “=”两侧数据类型不一致时，可以使用自动类型转换或使用强制类型转换原则进行处理。
+ 
+比较运算符
+
+![image](images/比较运算符.png)
+
+逻辑运算符
+
+![image](images/逻辑运算符.png)
+
+位运算符
+
+![image](images/位运算符.png)
+
+三元运算符
+
+![image](images/三元运算符.png)

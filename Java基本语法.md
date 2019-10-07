@@ -111,3 +111,67 @@ Boolean类型
 三元运算符
 
 ![image](images/三元运算符.png)
+
+### 程序流程控制
+
+#### if-else结构
+例：  
+
+```
+public class AgeTest{
+    public static void main(String args[]){
+    int age = 18;
+    if(age<0){
+            System.out.println("错误");
+    }else if(age>250){
+            System.out.println("超过范围")；
+    }else{
+             System.out.println("年龄："+ age);
+    }
+   }   
+ }
+ ```
+ 
+#### switch-case结构
+```
+switch(表达式）{  
+case 常量1：  
+     语句1；       
+     //break;       
+case 常量2：  
+     语句2；       
+     //break;  
+…    
+default：  
+     语句；  
+     //break  
+```     
+  - switch(表达式)中表达式的值必须是下述几种类型之一：byte，short，char，int，枚举(jdk5.0)，String(jdk7.0)
+  - case子句中的值必须是常量
+  
+ #### for循环
+```
+for(①初始化部分;②循环条件部分;④迭代部分){  
+     ③循环体部分       
+ }
+```
+
+ - 初始化部分可以声明多个变量，但必须是同一个类型，用逗号分隔
+ 
+ #### while循环
+``` 
+ ①初始化部分；     
+ while(②循环条件部分){  
+     ③循环体部分；       
+     ④迭代部分；  
+ }  
+```
+#### do-while循环
+```
+①初始化部分；     
+ do{   
+     ③循环体部分；       
+     ④迭代部分；  
+ }while(②循环条件部分)；  
+ ```    
+     

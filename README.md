@@ -777,3 +777,515 @@ public class NewPersonTest {
 
 }
 ```
+
+## 面向对象编程（下）
+
+### 关键字：static 
+ - static可以用来修饰：属性、方法、代码块、内部类
+ - 使用static修饰属性：静态变量（或类变量）
+    - 属性，按是否使用static修饰，又分为：静态属性  vs 非静态属性(实例变量)  
+    
+    实例变量：我们创建了类的多个对象，每个对象都独立的拥有一套类中的非静态属性。当修改其中一个对象中的非静态属性时，不会导致其他对象中同样的属性值的修改。  
+    
+    静态变量：我们创建了类的多个对象，多个对象共享同一个静态变量。当通过某一个对象修改静态变量时，会导致其他对象调用此静态变量时，是修改过了的。 
+    - static修饰属性的其他说明：  
+    
+    静态变量随着类的加载而加载。可以通过"类.静态变量"的方式进行调用  
+    
+    静态变量的加载要早于对象的创建。  
+    
+    由于类只会加载一次，则静态变量在内存中也只会存在一份：存在方法区的静态域中。
+          
+    - |      | 类变量 | 实例变量 |  
+      |  --- | -------| ------- |
+      | 类   |	 yes   |	no      |
+      | 对象	|  yes   |	yes     |
+           
+    - 静态属性举例：System.out; Math.PI;
+  
+ - 使用static修饰方法：静态方法
+    - 随着类的加载而加载，可以通过"类.静态方法"的方式进行调用
+    - |      | 静态方法 | 非静态方法 |  
+      |  --- | -------| ------- |
+      | 类   |	 yes   |	no      |
+      | 对象	|  yes   |	yes     |
+    - 静态方法中，只能调用静态的方法或属性
+    - 非静态方法中，既可以调用非静态的方法或属性，也可以调用静态的方法或属性
+ 
+ - static注意点：
+    - 在静态的方法内，不能使用this关键字、super关键字
+    - 关于静态属性和静态方法的使用，大家都从生命周期的角度去理解。
+ - 开发中，如何确定一个属性是否要声明为static的？
+    - 属性是可以被多个对象所共享的，不会随着对象的不同而不同的。
+    - 类中的常量也常常声明为static 
+ - 开发中，如何确定一个方法是否要声明为static的？
+    - 操作静态属性的方法，通常设置为static的
+    - 工具类中的方法，习惯上声明为static的。 比如：Math、Arrays、Collections
+
+### 单例(Singleton)设计模式
+ - 设计模式  
+ 
+ 大量的实践中总结和理论化之后优选的代码结构、编程风格、以及解决问题的思考方式。
+ - 单例设计模式  
+ 
+ 某个类只能存在一个对象实例。  
+ 
+ - 单例的饿汉式实现
+ ```
+ //饿汉式
+class Bank{
+	
+	//1.私有化类的构造器
+	private Bank(){
+		
+	}
+	
+	//2.内部创建类的对象
+	//4.要求此对象也必须声明为静态的
+	private static Bank instance = new Bank();
+	
+	//3.提供公共的静态的方法，返回类的对象
+	public static Bank getInstance(){
+		return instance;
+	}
+}
+```
+
+ - 单例的懒汉式实现
+```
+class Order{
+	
+	//1.私有化类的构造器
+	private Order(){
+		
+	}
+	
+	//2.声明当前类对象，没有初始化
+	//4.此对象也必须声明为static的
+	private static Order instance = null;
+	
+	//3.声明public、static的返回当前类对象的方法
+	public static Order getInstance(){
+		
+		if(instance == null){
+			
+			instance = new Order();
+			
+		}
+		return instance;
+	}
+	
+}
+```
+
+ - 区分区分饿汉式和懒汉式
+    - 饿汉式：	
+      
+      坏处：对象加载时间过长。    
+      
+      好处：饿汉式是线程安全的
+    
+    - 懒汉式：  
+      
+      好处：延迟对象的创建。   
+      
+      目前的写法坏处：线程不安全。--->到多线程内容时，再修改
+      
+ - 单例设计模式优点：减少系统性能开销
+ - 单例设计模式的应用场景
+    - 网站的计数器
+    - 应用程序的日志应用
+    - 数据库连接池
+    - 任务管理器
+    - 回收站
+
+### main方法 
+ - main()方法作为程序的入口
+ - main()方法也是一个普通的静态方法
+ - main()方法可以作为我们与控制台交互的方式。（之前：使用Scanner）
+ 
+### 类的成员之四：代码块
+ - 代码块的作用：用来初始化类、对象
+ - 代码块如果有修饰的话，只能使用static.
+ - 分类：静态代码块  vs 非静态代码块
+ - 静态代码块
+    - 内部可以有输出语句
+    - 随着类的加载而执行,而且只执行一次
+    - 作用：初始化类的信息
+    - 如果一个类中定义了多个静态代码块，则按照声明的先后顺序执行
+    - 静态代码块的执行要优先于非静态代码块的执行
+    - 静态代码块内只能调用静态的属性、静态的方法，不能调用非静态的结构
+ - 非静态代码块
+    - 内部可以有输出语句
+    - 随着对象的创建而执行
+    - 每创建一个对象，就执行一次非静态代码块
+    - 作用：可以在创建对象时，对对象的属性等进行初始化
+    - 如果一个类中定义了多个非静态代码块，则按照声明的先后顺序执行
+    - 非静态代码块内可以调用静态的属性、静态的方法，或非静态的属性
+### 关键字：final
+ - final可以用来修饰的结构：类、方法、变量
+ - final 用来修饰一个类:此类不能被其他类所继承。 比如：String类、System类、StringBuffer类
+ - final 用来修饰方法：表明此方法不可以被重写。比如：Object类中getClass();
+ - final 用来修饰变量：此时的"变量"就称为是一个常量。
+    - final修饰属性：可以考虑赋值的位置有：显式初始化、代码块中初始化、构造器中初始化
+    -  final修饰局部变量：尤其是使用final修饰形参时，表明此形参是一个常量。当我们调用此方法时，给常量形参赋一个实参。一旦赋值以后，就只能在方法体内使用此形参，但不能进行重新赋值。
+    -  static final 用来修饰属性：全局常量
+
+### 抽象类与抽象方法
+ - abstract可以用来修饰的结构：类、方法
+ - abstract修饰类：抽象类
+    - 此类不能实例化
+    - 抽象类中一定有构造器，便于子类实例化时调用（涉及：子类对象实例化的全过程）
+    - 开发中，都会提供抽象类的子类，让子类对象实例化，完成相关的操作
+ - abstract修饰方法：抽象方法
+    - 抽象方法只有方法的声明，没有方法体
+    - 包含抽象方法的类，一定是一个抽象类。反之，抽象类中可以没有抽象方法的。
+    - 若子类重写了父类中的所有的抽象方法后，此子类方可实例化
+    - 若子类没有重写父类中的所有的抽象方法，则此子类也是一个抽象类，需要使用abstract修饰
+    
+ ```
+ /*
+ * 抽象类的应用：模板方法的设计模式
+ * 
+ */
+public class TemplateTest {
+	public static void main(String[] args) {
+		
+		SubTemplate t = new SubTemplate();
+		
+		t.spendTime();
+	}
+}
+
+abstract class Template{
+	
+	//计算某段代码执行所需要花费的时间
+	public void spendTime(){
+		
+		long start = System.currentTimeMillis();
+		
+		this.code();//不确定的部分、易变的部分
+		
+		long end = System.currentTimeMillis();
+		
+		System.out.println("花费的时间为：" + (end - start));
+		
+	}
+	
+	public abstract void code();
+	
+	
+}
+
+class SubTemplate extends Template{
+
+	@Override
+	public void code() {
+		
+		for(int i = 2;i <= 1000;i++){
+			boolean isFlag = true;
+			for(int j = 2;j <= Math.sqrt(i);j++){
+				
+				if(i % j == 0){
+					isFlag = false;
+					break;
+				}
+			}
+			if(isFlag){
+				System.out.println(i);
+			}
+		}
+
+	}
+	
+}
+```
+### 接口
+ - 接口使用interface来定义
+ - Java中，接口和类是并列的两个结构
+ - 如何定义接口：定义接口中的成员
+    - JDK7及以前：只能定义全局常量和抽象方法：全局常量：public static final的.但是书写时，可以省略不写；抽象方法：public abstract的。
+    - JDK8：除了定义全局常量和抽象方法之外，还可以定义静态方法、默认方法（略）
+ - 接口中不能定义构造器的！意味着接口不可以实例化
+ - Java开发中，接口通过让类去实现(implements)的方式来使用.
+    - 如果实现类覆盖了接口中的所有抽象方法，则此实现类就可以实例化
+    -  如果实现类没有覆盖接口中所有的抽象方法，则此实现类仍为一个抽象类
+ - Java类可以实现多个接口   --->弥补了Java单继承性的局限性  
+ 
+ 格式：class AA extends BB implements CC,DD,EE  
+ - 接口与接口之间可以继承，而且可以多继承
+ - 接口的具体使用，体现多态性
+```
+/*
+ * 接口的使用
+ * 1.接口使用上也满足多态性
+ * 2.接口，实际上就是定义了一种规范
+ * 3.开发中，体会面向接口编程！
+ * 
+ */
+public class USBTest {
+	public static void main(String[] args) {
+		
+		Computer com = new Computer();
+		//1.创建了接口的非匿名实现类的非匿名对象
+		Flash flash = new Flash();
+		com.transferData(flash);
+		
+		//2. 创建了接口的非匿名实现类的匿名对象
+		com.transferData(new Printer());
+		
+		//3. 创建了接口的匿名实现类的非匿名对象
+		USB phone = new USB(){
+
+			@Override
+			public void start() {
+				System.out.println("手机开始工作");
+			}
+
+			@Override
+			public void stop() {
+				System.out.println("手机结束工作");
+			}
+			
+		};
+		com.transferData(phone);
+		
+		
+		//4. 创建了接口的匿名实现类的匿名对象
+		
+		com.transferData(new USB(){
+			@Override
+			public void start() {
+				System.out.println("mp3开始工作");
+			}
+
+			@Override
+			public void stop() {
+				System.out.println("mp3结束工作");
+			}
+		});
+	}
+}
+
+class Computer{
+	
+	public void transferData(USB usb){//USB usb = new Flash();
+		usb.start();
+		
+		System.out.println("具体传输数据的细节");
+		
+		usb.stop();
+	}
+	
+	
+}
+
+interface USB{
+	//常量：定义了长、宽、最大最小的传输速度等
+	
+	void start();
+	
+	void stop();
+	
+}
+
+class Flash implements USB{
+
+	@Override
+	public void start() {
+		System.out.println("U盘开启工作");
+	}
+
+	@Override
+	public void stop() {
+		System.out.println("U盘结束工作");
+	}
+	
+}
+
+class Printer implements USB{
+	@Override
+	public void start() {
+		System.out.println("打印机开启工作");
+	}
+
+	@Override
+	public void stop() {
+		System.out.println("打印机结束工作");
+	}
+	
+}
+```
+ - Java8中接口的新特性
+ ```
+ public class SubClassTest {
+	
+	public static void main(String[] args) {
+		SubClass s = new SubClass();
+		
+//		s.method1();
+//		SubClass.method1();
+		//知识点1：接口中定义的静态方法，只能通过接口来调用。
+		CompareA.method1();
+		//知识点2：通过实现类的对象，可以调用接口中的默认方法。
+		//如果实现类重写了接口中的默认方法，调用时，仍然调用的是重写以后的方法
+		s.method2();
+		//知识点3：如果子类(或实现类)继承的父类和实现的接口中声明了同名同参数的默认方法，
+		//那么子类在没有重写此方法的情况下，默认调用的是父类中的同名同参数的方法。-->类优先原则
+		//知识点4：如果实现类实现了多个接口，而这多个接口中定义了同名同参数的默认方法，
+		//那么在实现类没有重写此方法的情况下，报错。-->接口冲突。
+		//这就需要我们必须在实现类中重写此方法
+		s.method3();
+		
+	}
+	
+}
+
+class SubClass extends SuperClass implements CompareA,CompareB{
+	
+	public void method2(){
+		System.out.println("SubClass：上海");
+	}
+	
+	public void method3(){
+		System.out.println("SubClass：深圳");
+	}
+	
+	//知识点5：如何在子类(或实现类)的方法中调用父类、接口中被重写的方法
+	public void myMethod(){
+		method3();//调用自己定义的重写的方法
+		super.method3();//调用的是父类中声明的
+		//调用接口中的默认方法
+		CompareA.super.method3();
+		CompareB.super.method3();
+	}
+}
+
+public class SuperClass {
+	
+	public void method3(){
+		System.out.println("SuperClass:北京");
+	}
+	
+}
+``` 
+### 类的内部成员之五：内部类
+ - Java中允许将一个类A声明在另一个类B中，则类A就是内部类，类B称为外部类
+ - 内部类的分类：成员内部类（静态、非静态）  vs 局部内部类(方法内、代码块内、构造器内)
+ - 成员内部类
+    - 一方面，作为外部类的成员：>调用外部类的结构；>可以被static修饰；>可以被4种不同的权限修饰
+    - 另一方面，作为一个类：> 类内可以定义属性、方法、构造器等；> 可以被final修饰，表示此类不能被继承。言外之意，不使用final，就可以被继承；> 可以被abstract修饰
+ - 如何实例化成员内部类的对象
+ - 如何在成员内部类中区分调用外部类的结构
+```
+public class InnerClassTest {
+	public static void main(String[] args) {
+		
+		//创建Dog实例(静态的成员内部类):
+		Person.Dog dog = new Person.Dog();
+		dog.show();
+		//创建Bird实例(非静态的成员内部类):
+//		Person.Bird bird = new Person.Bird();//错误的
+		Person p = new Person();
+		Person.Bird bird = p.new Bird();
+		bird.sing();
+		
+		System.out.println();
+		
+		bird.display("黄鹂");
+		
+	}
+}
+
+
+class Person{
+	
+	String name = "小明";
+	int age;
+	
+	public void eat(){
+		System.out.println("人：吃饭");
+	}
+	
+	
+	//静态成员内部类
+	static class Dog{
+		String name;
+		int age;
+		
+		public void show(){
+			System.out.println("卡拉是条狗");
+//			eat();
+		}
+		
+	}
+	//非静态成员内部类
+	class Bird{
+		String name = "杜鹃";
+		
+		public Bird(){
+			
+		}
+		
+		public void sing(){
+			System.out.println("我是一只小小鸟");
+			Person.this.eat();//调用外部类的非静态属性
+			eat();
+			System.out.println(age);
+		}
+		
+		public void display(String name){
+			System.out.println(name);//方法的形参
+			System.out.println(this.name);//内部类的属性
+			System.out.println(Person.this.name);//外部类的属性
+		}
+	}
+	}
+	
+	
+}
+```
+ - 局部内部类的使用
+ ```
+ public class InnerClassTest1 {
+	
+	
+	//开发中很少见
+	public void method(){
+		//局部内部类
+		class AA{
+			
+		}
+	}
+	
+	
+	//返回一个实现了Comparable接口的类的对象
+	public Comparable getComparable(){
+		
+		//创建一个实现了Comparable接口的类:局部内部类
+		//方式一：
+//		class MyComparable implements Comparable{
+//
+//			@Override
+//			public int compareTo(Object o) {
+//				return 0;
+//			}
+//			
+//		}
+//		
+//		return new MyComparable();
+		
+		//方式二：
+		return new Comparable(){
+
+			@Override
+			public int compareTo(Object o) {
+				return 0;
+			}
+			
+		};
+		
+	}
+	
+}
+```

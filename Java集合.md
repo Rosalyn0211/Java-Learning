@@ -788,7 +788,8 @@ import java.util.*;
  *
  *       补充：关于情况2和情况3：此时key1-value1和原来的数据以链表的方式存储。
  *
- *      在不断的添加过程中，会涉及到扩容问题，当超出临界值(且要存放的位置非空)时，扩容。默认的扩容方式：扩容为原来容量的2倍，并将原有的数据复制过来。
+ *      在不断的添加过程中，会涉及到扩容问题，当超出临界值(且要存放的位置非空)时，扩容。
+ *      默认的扩容方式：扩容为原来容量的2倍，并将原有的数据复制过来。
  *
  *      jdk8 相较于jdk7在底层实现方面的不同：
  *      1. new HashMap():底层没有创建一个长度为16的数组
@@ -796,7 +797,8 @@ import java.util.*;
  *      3. 首次调用put()方法时，底层创建长度为16的数组
  *      4. jdk7底层结构只有：数组+链表。jdk8中底层结构：数组+链表+红黑树。
  *         4.1 形成链表时，七上八下（jdk7:新的元素指向旧的元素。jdk8：旧的元素指向新的元素）
-           4.2 当数组的某一个索引位置上的元素以链表形式存在的数据个数 > 8 且当前数组的长度 > 64时，此时此索引位置上的所数据改为使用红黑树存储。
+           4.2 当数组的某一个索引位置上的元素以链表形式存在的数据个数 > 8 且当前数组的长度 > 64时，
+           此时此索引位置上的所数据改为使用红黑树存储。
  *
  *      DEFAULT_INITIAL_CAPACITY : HashMap的默认容量，16
  *      DEFAULT_LOAD_FACTOR：HashMap的默认加载因子：0.75
@@ -982,6 +984,112 @@ public class MapTest {
         Map map = new HashMap();
 //        map = new Hashtable();
         map.put(null,123);
+
+    }
+}
+```
+```
+import org.junit.Test;
+import java.util.*;
+
+public class TreeMapTest {
+
+    //向TreeMap中添加key-value，要求key必须是由同一个类创建的对象
+    //因为要按照key进行排序：自然排序 、定制排序
+    //自然排序
+    @Test
+    public void test1(){
+        TreeMap map = new TreeMap();
+        User u1 = new User("Tom",23);
+        User u2 = new User("Jerry",32);
+        User u3 = new User("Jack",20);
+        User u4 = new User("Rose",18);
+
+        map.put(u1,98);
+        map.put(u2,89);
+        map.put(u3,76);
+        map.put(u4,100);
+
+        Set entrySet = map.entrySet();
+        Iterator iterator1 = entrySet.iterator();
+        while (iterator1.hasNext()){
+            Object obj = iterator1.next();
+            Map.Entry entry = (Map.Entry) obj;
+            System.out.println(entry.getKey() + "---->" + entry.getValue());
+
+        }
+    }
+
+    //定制排序
+    @Test
+    public void test2(){
+        TreeMap map = new TreeMap(new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                if(o1 instanceof User && o2 instanceof User){
+                    User u1 = (User)o1;
+                    User u2 = (User)o2;
+                    return Integer.compare(u1.getAge(),u2.getAge());
+                }
+                throw new RuntimeException("输入的类型不匹配！");
+            }
+        });
+        User u1 = new User("Tom",23);
+        User u2 = new User("Jerry",32);
+        User u3 = new User("Jack",20);
+        User u4 = new User("Rose",18);
+
+        map.put(u1,98);
+        map.put(u2,89);
+        map.put(u3,76);
+        map.put(u4,100);
+
+        Set entrySet = map.entrySet();
+        Iterator iterator1 = entrySet.iterator();
+        while (iterator1.hasNext()){
+            Object obj = iterator1.next();
+            Map.Entry entry = (Map.Entry) obj;
+            System.out.println(entry.getKey() + "---->" + entry.getValue());
+
+        }
+    }
+
+
+}
+```
+```
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+public class PropertiesTest {
+
+    //Properties:常用来处理配置文件。key和value都是String类型
+    public static void main(String[] args)  {
+        FileInputStream fis = null;
+        try {
+            Properties pros = new Properties();
+
+            fis = new FileInputStream("jdbc.properties");
+            pros.load(fis);//加载流对应的文件
+
+            String name = pros.getProperty("name");
+            String password = pros.getProperty("password");
+
+            System.out.println("name = " + name + ", password = " + password);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(fis != null){
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
 
     }
 }

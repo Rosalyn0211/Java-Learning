@@ -197,3 +197,366 @@ public class ReflectionTest {
     }
 }
 ```
+```
+import org.junit.Test;
+import java.io.InputStream;
+import java.util.Properties;
+
+/**
+ * 了解类的加载器
+ */
+public class ClassLoaderTest {
+
+    @Test
+    public void test1(){
+        //对于自定义类，使用系统类加载器进行加载
+        ClassLoader classLoader = ClassLoaderTest.class.getClassLoader();
+        System.out.println(classLoader);
+        //调用系统类加载器的getParent()：获取扩展类加载器
+        ClassLoader classLoader1 = classLoader.getParent();
+        System.out.println(classLoader1);
+        //调用扩展类加载器的getParent()：无法获取引导类加载器
+        //引导类加载器主要负责加载java的核心类库，无法加载自定义类的。
+        ClassLoader classLoader2 = classLoader1.getParent();
+        System.out.println(classLoader2);
+
+        ClassLoader classLoader3 = String.class.getClassLoader();
+        System.out.println(classLoader3);
+
+    }
+    /*
+    Properties：用来读取配置文件。
+     */
+    @Test
+    public void test2() throws Exception {
+
+        Properties pros =  new Properties();
+        //此时的文件默认在当前的module下。
+        //读取配置文件的方式一：
+//        FileInputStream fis = new FileInputStream("jdbc.properties");
+//        FileInputStream fis = new FileInputStream("src\\jdbc1.properties");
+//        pros.load(fis);
+
+        //读取配置文件的方式二：使用ClassLoader
+        //配置文件默认识别为：当前module的src下
+        ClassLoader classLoader = ClassLoaderTest.class.getClassLoader();
+        InputStream is = classLoader.getResourceAsStream("jdbc1.properties");
+        pros.load(is);
+        
+        String user = pros.getProperty("user");
+        String password = pros.getProperty("password");
+        System.out.println("user = " + user + ",password = " + password);
+    }
+}
+```
+### 创建运行时类的对象
+```
+import org.junit.Test;
+import java.util.Random;
+/**
+ * 通过反射创建对应的运行时类的对象
+ *
+ */
+public class NewInstanceTest {
+
+    @Test
+    public void test1() throws IllegalAccessException, InstantiationException {
+
+        Class<Person> clazz = Person.class;
+        /*
+        newInstance():调用此方法，创建对应的运行时类的对象。内部调用了运行时类的空参的构造器。
+
+        要想此方法正常的创建运行时类的对象，要求：
+        1.运行时类必须提供空参的构造器
+        2.空参的构造器的访问权限得够。通常，设置为public。
+
+        在javabean中要求提供一个public的空参构造器。原因：
+        1.便于通过反射，创建运行时类的对象
+        2.便于子类继承此运行时类时，默认调用super()时，保证父类有此构造器
+
+         */
+        Person obj = clazz.newInstance();
+        System.out.println(obj);
+
+    }
+
+    //体会反射的动态性
+    @Test
+    public void test2(){
+
+        for(int i = 0;i < 100;i++){
+            int num = new Random().nextInt(3);//0,1,2
+            String classPath = "";
+            switch(num){
+                case 0:
+                    classPath = "java.util.Date";
+                    break;
+                case 1:
+                    classPath = "java.lang.Object";
+                    break;
+                case 2:
+                    classPath = "com.atguigu.java.Person";
+                    break;
+            }
+
+            try {
+                Object obj = getInstance(classPath);
+                System.out.println(obj);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /*
+    创建一个指定类的对象。
+    classPath:指定类的全类名
+     */
+    public Object getInstance(String classPath) throws Exception {
+       Class clazz =  Class.forName(classPath);
+       return clazz.newInstance();
+    }
+}
+```
+### 获取运行时类的完整结构
+```
+import java.io.Serializable;
+
+public class Creature<T> implements Serializable {
+    private char gender;
+    public double weight;
+
+    private void breath(){
+        System.out.println("生物呼吸");
+    }
+
+    public void eat(){
+        System.out.println("生物吃东西");
+    }
+
+}
+
+```
+```
+public interface MyInterface {
+    void info();
+}
+```
+```
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+
+@Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyAnnotation {
+    String value() default "hello";
+
+}
+```
+```
+@MyAnnotation(value="hi")
+public class Person extends Creature<String> implements Comparable<String>,MyInterface{
+
+    private String name;
+    int age;
+    public int id;
+
+    public Person(){}
+
+    @MyAnnotation(value="abc")
+    private Person(String name){
+        this.name = name;
+    }
+
+     Person(String name,int age){
+        this.name = name;
+        this.age = age;
+    }
+    @MyAnnotation
+    private String show(String nation){
+        System.out.println("我的国籍是：" + nation);
+        return nation;
+    }
+
+    public String display(String interests,int age) throws NullPointerException,ClassCastException{
+        return interests + age;
+    }
+
+
+    @Override
+    public void info() {
+        System.out.println("我是一个人");
+    }
+
+    @Override
+    public int compareTo(String o) {
+        return 0;
+    }
+
+    private static void showDesc(){
+        System.out.println("我是一个可爱的人");
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", id=" + id +
+                '}';
+    }
+}
+
+```
+```
+import com.atguigu.java1.Person;
+import org.junit.Test;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+/**
+ * 获取当前运行时类的属性结构
+ *
+ */
+public class FieldTest {
+
+    @Test
+    public void test1(){
+
+        Class clazz = Person.class;
+
+        //获取属性结构
+        //getFields():获取当前运行时类及其父类中声明为public访问权限的属性
+        Field[] fields = clazz.getFields();
+        for(Field f : fields){
+            System.out.println(f); 
+        }
+        System.out.println();
+
+        //getDeclaredFields():获取当前运行时类中声明的所有属性。（不包含父类中声明的属性）
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for(Field f : declaredFields){
+            System.out.println(f);
+        }
+    }
+
+    //权限修饰符  数据类型 变量名
+    @Test
+    public void test2(){
+        Class clazz = Person.class;
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for(Field f : declaredFields){
+            //1.权限修饰符
+            int modifier = f.getModifiers();
+            System.out.print(Modifier.toString(modifier) + "\t");
+
+            //2.数据类型
+            Class type = f.getType();
+            System.out.print(type.getName() + "\t");
+
+            //3.变量名
+            String fName = f.getName();
+            System.out.print(fName);
+
+            System.out.println();
+        }
+
+
+    }
+
+
+}
+```
+```
+import com.atguigu.java1.Person;
+import org.junit.Test;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+/**
+ * 获取运行时类的方法结构
+ */
+public class MethodTest {
+
+    @Test
+    public void test1(){
+
+        Class clazz = Person.class;
+
+        //getMethods():获取当前运行时类及其所有父类中声明为public权限的方法
+        Method[] methods = clazz.getMethods();
+        for(Method m : methods){
+            System.out.println(m);
+        }
+        System.out.println();
+        //getDeclaredMethods():获取当前运行时类中声明的所有方法。（不包含父类中声明的方法）
+        Method[] declaredMethods = clazz.getDeclaredMethods();
+        for(Method m : declaredMethods){
+            System.out.println(m);
+        }
+    }
+
+    /*
+    @Xxxx
+    权限修饰符  返回值类型  方法名(参数类型1 形参名1,...) throws XxxException{}
+     */
+    @Test
+    public void test2(){
+        Class clazz = Person.class;
+        Method[] declaredMethods = clazz.getDeclaredMethods();
+        for(Method m : declaredMethods){
+            //1.获取方法声明的注解
+            Annotation[] annos = m.getAnnotations();
+            for(Annotation a : annos){
+                System.out.println(a);
+            }
+
+            //2.权限修饰符
+            System.out.print(Modifier.toString(m.getModifiers()) + "\t");
+
+            //3.返回值类型
+            System.out.print(m.getReturnType().getName() + "\t");
+
+            //4.方法名
+            System.out.print(m.getName());
+            System.out.print("(");
+            //5.形参列表
+            Class[] parameterTypes = m.getParameterTypes();
+            if(!(parameterTypes == null && parameterTypes.length == 0)){
+                for(int i = 0;i < parameterTypes.length;i++){
+
+                    if(i == parameterTypes.length - 1){
+                        System.out.print(parameterTypes[i].getName() + " args_" + i);
+                        break;
+                    }
+
+                    System.out.print(parameterTypes[i].getName() + " args_" + i + ",");
+                }
+            }
+
+            System.out.print(")");
+
+            //6.抛出的异常
+            Class[] exceptionTypes = m.getExceptionTypes();
+            if(exceptionTypes.length > 0){
+                System.out.print("throws ");
+                for(int i = 0;i < exceptionTypes.length;i++){
+                    if(i == exceptionTypes.length - 1){
+                        System.out.print(exceptionTypes[i].getName());
+                        break;
+                    }
+
+                    System.out.print(exceptionTypes[i].getName() + ",");
+                }
+            }
+            System.out.println();
+        }
+    }
+}
+```
